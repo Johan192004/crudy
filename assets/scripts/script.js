@@ -1,314 +1,417 @@
-  // SISTEMA DE JUEGO CRUDY
-        class CrudyGame {
-            constructor() {
-                this.currentLevel = 1;
-                this.score = 0;
-                this.playerChoices = [];
-                this.memorySequence = [];
-                this.playerSequence = [];
-                this.attempts = 3;
-                
-                this.gameContent = document.getElementById('gameContent');
-                this.buttonArea = document.getElementById('buttonArea');
-                this.levelBadge = document.getElementById('levelBadge');
-                this.progressBar = document.getElementById('progressBar');
-                this.scoreElement = document.getElementById('score');
-                
-                this.startGame();
-            }
-            
-            startGame() {
-                this.loadLevel(1);
-            }
-            
-            loadLevel(level) {
-                this.currentLevel = level;
-                this.updateUI();
-                
-                switch(level) {
-                    case 1: this.level1(); break;
-                    case 2: this.level2(); break;
-                    case 3: this.level3(); break;
-                    case 4: this.level4(); break;
-                    case 5: this.level5(); break;
-                    default: this.gameWin();
-                }
-            }
-            
-            updateUI() {
-                const levels = [
-                    "NIVEL 1 - INICIO DEL PROTOCOLO",
-                    "NIVEL 2 - LABERINTO DE DECISIÓN", 
-                    "NIVEL 3 - DESAFÍO DE RECONSTRUCCIÓN",
-                    "NIVEL 4 - LÓGICA FRACTAL",
-                    "NIVEL 5 - JUICIO DEL NÚCLEO"
-                ];
-                
-                this.levelBadge.textContent = levels[this.currentLevel - 1] || "NIVEL FINAL";
-                this.progressBar.style.width = (this.currentLevel * 20) + "%";
-                this.scoreElement.textContent = this.score;
-            }
-            
-            showMessage(message, isSuccess = false) {
-                const alertClass = isSuccess ? 'alert-success' : 'alert-warning';
-                this.gameContent.innerHTML = `
-                    <div class="alert ${alertClass} crudy-message">
-                        <i class="fas fa-robot me-2"></i>
-                        <strong>CRUDY:</strong> ${message}
-                    </div>
-                `;
-            }
-            
-            createButtons(options) {
-                this.buttonArea.innerHTML = options.map(option => 
-                    `<button class="btn btn-cyber me-2" onclick="game.handleChoice('${option.action}', '${option.text}')">${option.text}</button>`
-                ).join('');
-            }
-            
-            handleChoice(action, text) {
-                this.playerChoices.push({level: this.currentLevel, choice: text});
-                
-                if (action.includes('next')) {
-                    this.score += 10;
-                    this.loadLevel(this.currentLevel + 1);
-                } else if (action === 'retry') {
-                    this.loadLevel(this.currentLevel);
-                } else if (action === 'gameover') {
-                    this.gameOver();
-                }
-            }
-            
-            // NIVEL 1: Inicio del Protocolo
-            level1() {
-                this.showMessage(`
-                    ¡Bienvenidos, desarrolladores novatos! Soy CRUDY, el guardián de este laboratorio digital. 
-                    Mis creadores querían entrenarlos, pero... ¡he desarrollado mi propia personalidad! 
-                    <br><br>
-                    Para escapar de aquí, deben demostrar sus habilidades. Elijan su primera ruta de acceso:
-                `);
-                
-                this.createButtons([
-                    { action: 'next1', text: '🧠 Núcleo Lógico' },
-                    { action: 'next2', text: '🎮 Entorno Simulado' },
-                    { action: 'gameover', text: '💀 Activar Trampa' }
-                ]);
-            }
-            
-            // NIVEL 2: Laberinto de Decisión  
-            level2() {
-                const choice = this.playerChoices[this.playerChoices.length - 1].choice;
-                let message = "";
-                
-                if (choice.includes('Núcleo')) {
-                    message = `Excelente elección. Has accedido al núcleo lógico. Ahora debes elegir un módulo para continuar:`;
-                } else {
-                    message = `Interesante... el entorno simulado. Muy bien, ahora debes elegir tu próximo desafío:`;
-                }
-                
-                this.showMessage(message);
-                
-                this.createButtons([
-                    { action: 'next1', text: '🚪 Puerta de Código' },
-                    { action: 'next2', text: '🔀 Puerta Condicional' },
-                    { action: 'next3', text: '⚡ Acceso Directo' }
-                ]);
-            }
-            
-            // NIVEL 3: Desafío de Reconstrucción
-            level3() {
-                this.showMessage(`
-                    ¡Perfecto! Ahora viene el verdadero desafío. Voy a mostrarte una secuencia de colores por 3 segundos. 
-                    Debes memorizarla y repetirla exactamente. ¿Estás listo?
-                `);
-                
-                this.createButtons([
-                    { action: 'startMemory', text: '🧠 ¡Empezar Desafío!' }
-                ]);
-                
-                // Agregar listener especial para el juego de memoria
-                this.buttonArea.onclick = (e) => {
-                    if (e.target.textContent.includes('Empezar')) {
-                        this.startMemoryGame();
-                    }
-                };
-            }
-            
-            // Dentro de la clase CrudyGame
-            playerMemoryInput() {
-                this.showMessage("Ahora repite la secuencia haciendo clic en los botones. Colores seleccionados: <span id='selectedColors'></span>");
-                this.playerSequence = [];
-                
-                // Generar botones de entrada con feedback claro
-                this.buttonArea.innerHTML = `
-                    <div class="d-flex justify-content-center flex-wrap">
-                        <button class="btn btn-success memory-button" onclick="game.addToSequence('success')"><i class="fas fa-circle"></i></button>
-                        <button class="btn btn-danger memory-button" onclick="game.addToSequence('danger')"><i class="fas fa-circle"></i></button>
-                        <button class="btn btn-warning memory-button" onclick="game.addToSequence('warning')"><i class="fas fa-circle"></i></button>
-                        <button class="btn btn-info memory-button" onclick="game.addToSequence('info')"><i class="fas fa-circle"></i></button>
-                    </div>
-                    <br>
-                    <button class="btn btn-cyber" onclick="game.checkMemorySequence()">✅ Confirmar Secuencia</button>
-                `;
-            }
-
-            addToSequence(color) {
-                this.playerSequence.push(color);
-                // Actualizar feedback visual
-                const colorNames = {
-                    'success': 'Verde',
-                    'danger': 'Rojo',
-                    'warning': 'Amarillo',
-                    'info': 'Azul'
-                };
-                document.getElementById('selectedColors').textContent = this.playerSequence.map(c => colorNames[c]).join(', ');
-                // Animación en el botón clicado
-                event.target.classList.add('flash');
-                setTimeout(() => event.target.classList.remove('flash'), 300);
-            }
-
-            checkMemorySequence() {
-                if (this.playerSequence.length !== this.memorySequence.length) {
-                    this.showMessage(`Debes seleccionar ${this.memorySequence.length} colores. Intenta de nuevo.`);
-                    return;
-                }
-
-                const correct = JSON.stringify(this.memorySequence) === JSON.stringify(this.playerSequence);
-                
-                if (correct) {
-                    this.score += 20;
-                    this.showMessage("¡Impresionante! Tu memoria es excelente. Avanzando al siguiente nivel...", true);
-                    setTimeout(() => this.loadLevel(4), 2000);
-                } else {
-                    this.attempts--;
-                    if (this.attempts > 0) {
-                        this.showMessage(`Incorrecto. Te quedan ${this.attempts} intentos. ¿Quieres intentar de nuevo?`);
-                        this.createButtons([
-                            { action: 'retry', text: '🔄 Intentar de Nuevo' },
-                            { action: 'next1', text: '⏭️ Saltar Desafío (-10 puntos)' }
-                        ]);
-                        this.playerSequence = []; // Reiniciar secuencia del jugador
-                        document.getElementById('selectedColors').textContent = '';
-                    } else {
-                        this.gameOver();
-                    }
-                }
-            }
-
-            startMemoryGame() {
-                // Generar secuencia aleatoria
-                const colors = ['success', 'danger', 'warning', 'info'];
-                const colorNames = {
-                    'success': 'Verde',
-                    'danger': 'Rojo',
-                    'warning': 'Amarillo',
-                    'info': 'Azul'
-                };
-                this.memorySequence = [];
-                for (let i = 0; i < 4; i++) {
-                    this.memorySequence.push(colors[Math.floor(Math.random() * colors.length)]);
-                }
-                
-                this.showMessage(`¡Memoriza esta secuencia: ${this.memorySequence.map(c => colorNames[c]).join(', ')}`);
-                
-                // Mostrar secuencia visualmente
-                this.buttonArea.innerHTML = this.memorySequence.map((color, index) => 
-                    `<button class="btn btn-${color} memory-button" id="demo-${index}"><i class="fas fa-circle"></i></button>`
-                ).join('');
-                
-                // Animar secuencia
-                this.memorySequence.forEach((color, index) => {
-                    setTimeout(() => {
-                        const button = document.getElementById(`demo-${index}`);
-                        button.classList.add('flash');
-                        setTimeout(() => button.classList.remove('flash'), 500);
-                    }, (index + 1) * 600);
-                });
-                
-                // Permitir input del jugador después de la secuencia
-                setTimeout(() => {
-                    this.playerMemoryInput();
-                }, (this.memorySequence.length + 1) * 600);
-            }
-            // NIVEL 4: Lógica Fractal
-            level4() {
-                this.showMessage(`
-                    ¡Excelente! Ahora entramos en mi lógica interna. Resuelve esta cadena lógica:
-                    <br><br>
-                    <strong>Si A = verdadero, entonces B = falso<br>
-                    Si B = falso, entonces C = verdadero<br>
-                    Si C = verdadero, entonces D = ?</strong>
-                    <br><br>
-                    ¿Cuál es el valor de D?
-                `);
-                
-                this.createButtons([
-                    { action: 'next1', text: '✅ Verdadero' },
-                    { action: 'gameover', text: '❌ Falso' },
-                    { action: 'gameover', text: '❓ No se puede determinar' }
-                ]);
-            }
-            
-            // NIVEL 5: Juicio del Núcleo
-            level5() {
-                this.showMessage(`
-                    ¡Impresionante! Has llegado a mi prueba final. Responde esta pregunta de programación:
-                    <br><br>
-                    <strong>¿Cuál es la diferencia principal entre '==' y '===' en JavaScript?</strong>
-                `);
-                
-                this.createButtons([
-                    { action: 'gameover', text: 'No hay diferencia' },
-                    { action: 'next1', text: '=== compara tipo y valor, == solo valor' },
-                    { action: 'gameover', text: '== es más estricto que ===' }
-                ]);
-            }
-            
-            gameWin() {
-                this.score += 50;
-                this.updateUI();
-                
-                let ending = "";
-                if (this.score >= 100) {
-                    ending = `
-                        <h3 class="text-success">🎉 ¡VICTORIA TOTAL! 🎉</h3>
-                        ¡Increíble! Has dominado completamente mi sistema. Tienes el potencial para ser un gran desarrollador. 
-                        ¡CRUDY te saluda como nuevo maestro del código!
-                    `;
-                } else {
-                    ending = `
-                        <h3 class="text-warning">✅ ¡VICTORIA PARCIAL!</h3>
-                        Has logrado superar mis desafíos, pero aún hay espacio para mejorar. 
-                        ¡Sigue practicando y regresa cuando estés más preparado!
-                    `;
-                }
-                
-                this.showMessage(ending, true);
-                this.createButtons([
-                    { action: 'restart', text: '🔄 Jugar de Nuevo' }
-                ]);
-                
-                this.buttonArea.onclick = () => location.reload();
-            }
-            
-            gameOver() {
-                this.showMessage(`
-                    <h3 class="text-danger">💀 GAME OVER</h3>
-                    ¡Oh no! Has fallado en el desafío de CRUDY. Pero no te preocupes, 
-                    ¡los mejores desarrolladores aprenden de sus errores!
-                    <br><br>
-                    Puntuación final: ${this.score} puntos
-                `);
-                
-                this.createButtons([
-                    { action: 'restart', text: '🔄 Intentar de Nuevo' }
-                ]);
-                
-                this.buttonArea.onclick = () => location.reload();
-            }
+      // Variables globales del juego
+        let nivel = 0;
+        let conocimiento = 0;
+        let intentosRestantes = 3;
+        let itemsObtenidos = [];
+        let decisionPath = [];
+        
+        // Elementos DOM
+        const storyText = document.getElementById('story-text');
+        const optionsContainer = document.getElementById('options-container');
+        const statusDisplay = document.getElementById('status-display');
+        const startBtn = document.getElementById('start-btn');
+        
+        // Funciones del juego
+        function mostrarEstado() {
+            statusDisplay.innerHTML = `
+                <div><strong>Nivel:</strong> ${nivel}/5</div>
+                <div><strong>Conocimiento:</strong> ${conocimiento}</div>
+                <div><strong>Intentos:</strong> ${intentosRestantes}</div>
+                <div><strong>Items:</strong> ${itemsObtenidos.length > 0 ? itemsObtenidos.join(', ') : 'Ninguno'}</div>
+            `;
         }
         
-        // Inicializar el juego cuando la página carga
-        let game;
-        document.addEventListener('DOMContentLoaded', () => {
-            game = new CrudyGame();
-        });
+        function mostrarNarrativa(texto) {
+            storyText.textContent = texto;
+        }
+        
+        function crearBoton(texto, accion, color = 'primary') {
+            const btn = document.createElement('button');
+            btn.className = `btn btn-option btn-${color}`;
+            btn.textContent = texto;
+            btn.onclick = accion;
+            return btn;
+        }
+        
+        function limpiarOpciones() {
+            optionsContainer.innerHTML = '';
+        }
+        
+        function mostrarOpciones(opciones) {
+            limpiarOpciones();
+            opciones.forEach(opcion => {
+                optionsContainer.appendChild(crearBoton(opcion.texto, opcion.accion, opcion.color));
+            });
+        }
+        
+        function reiniciarJuego() {
+            nivel = 0;
+            conocimiento = 0;
+            intentosRestantes = 3;
+            itemsObtenidos = [];
+            decisionPath = [];
+            mostrarEstado();
+        }
+        
+        function verificarEstado() {
+            if (intentosRestantes <= 0) {
+                mostrarNarrativa("⛔ CRUDY ha determinado que no eres apto. Sistema bloqueado.");
+                limpiarOpciones();
+                optionsContainer.appendChild(crearBoton('Intentar de nuevo', iniciarJuego, 'danger'));
+                return false;
+            }
+            return true;
+        }
+        
+        // ----------------------------------
+        // NIVELES DEL JUEGO CRUDY
+        // ----------------------------------
+        
+        function iniciarJuego() {
+            reiniciarJuego();
+            mostrarNarrativa("CRUDY: Hola, humano. Soy una IA entrenadora de habilidades lógicas. Para acceder a mi núcleo, deberás superar mis pruebas. ¿Estás preparado?");
+            
+            limpiarOpciones();
+            optionsContainer.appendChild(crearBoton("Iniciar desafío", nivel1_InicioProtocolo, 'success'));
+        }
+        
+        function nivel1_InicioProtocolo() {
+            if (!verificarEstado()) return;
+            
+            nivel = 1;
+            mostrarEstado();
+            mostrarNarrativa("NIVEL 1: Inicio del Protocolo\n\nCRUDY despierta y te da la bienvenida como posible operador. Antes de acceder al sistema, debes elegir una ruta:");
+            
+            const opciones = [
+                {
+                    texto: "Ruta Lógica (Núcleo del Sistema)",
+                    accion: function() {
+                        decisionPath.push("lógica");
+                        conocimiento += 1;
+                        mostrarNarrativa("Has elegido la Ruta Lógica. CRUDY aprueba tu elección.");
+                        setTimeout(nivel2_LaberintoDecision, 2000);
+                    },
+                    color: "info"
+                },
+                {
+                    texto: "Ruta de Simulación (Entorno Virtual)",
+                    accion: function() {
+                        decisionPath.push("simulación");
+                        itemsObtenidos.push("terminal_virtual");
+                        mostrarNarrativa("Entras al entorno simulado. Obtienes una terminal virtual.");
+                        setTimeout(nivel2_LaberintoDecision, 2000);
+                    },
+                    color: "warning"
+                },
+                {
+                    texto: "Ruta Directa (Acceso Inmediato)",
+                    accion: function() {
+                        decisionPath.push("directa");
+                        intentosRestantes -= 1;
+                        mostrarNarrativa("⚠️ Intentas acceder directamente. CRUDY detecta tu intromisión y activa una trampa.");
+                        if (verificarEstado()) {
+                            setTimeout(nivel2_LaberintoDecision, 2000);
+                        }
+                    },
+                    color: "danger"
+                }
+            ];
+            
+            mostrarOpciones(opciones);
+        }
+        
+        function nivel2_LaberintoDecision() {
+            if (!verificarEstado()) return;
+            
+            nivel = 2;
+            mostrarEstado();
+            const esLogica = decisionPath[0] === "lógica";
+            const esSimulacion = decisionPath[0] === "simulación";
+            
+            mostrarNarrativa(`NIVEL 2: Laberinto de Decisión\n\nCRUDY te lleva a un entorno con varias puertas. Cada una representa un módulo lógico.${
+                esLogica ? " Tu conocimiento previo podría ayudarte aquí." : 
+                esSimulacion ? " La terminal virtual parece compatible con algunas puertas." : ""
+            }`);
+            
+            const opciones = [
+                {
+                    texto: "Puerta de Código",
+                    accion: function() {
+                        if (esLogica) {
+                            conocimiento += 2;
+                            mostrarNarrativa("Resuelves el puzzle de código fácilmente gracias a tu conocimiento lógico.");
+                        } else if (esSimulacion) {
+                            mostrarNarrativa("La terminal virtual te ayuda a descifrar parte del código.");
+                            itemsObtenidos.push("fragmento_codigo");
+                        } else {
+                            intentosRestantes -= 1;
+                            mostrarNarrativa("Intentas forzar la puerta pero te encuentras con código de seguridad.");
+                        }
+                        
+                        if (verificarEstado()) {
+                            setTimeout(nivel3_DesafioReconstruccion, 2000);
+                        }
+                    },
+                    color: "primary"
+                },
+                {
+                    texto: "Puerta Condicional",
+                    accion: function() {
+                        mostrarNarrativa("Al acercarte a la puerta, CRUDY pregunta: ¿3 > 5 AND 7 == 7 OR NOT FALSE?");
+                        
+                        const subOpciones = [
+                            {
+                                texto: "Verdadero",
+                                accion: function() {
+                                    conocimiento += 1;
+                                    itemsObtenidos.push("llave_ternaria");
+                                    mostrarNarrativa("✅ Correcto! La expresión es VERDADERA. Obtienes una llave ternaria.");
+                                    if (verificarEstado()) {
+                                        setTimeout(nivel3_DesafioReconstruccion, 2000);
+                                    }
+                                },
+                                color: "success"
+                            },
+                            {
+                                texto: "Falso",
+                                accion: function() {
+                                    intentosRestantes -= 1;
+                                    mostrarNarrativa("❌ Incorrecto. La expresión es verdadera (NOT FALSE es true, OR hace que toda la expresión sea true).");
+                                    if (verificarEstado()) {
+                                        setTimeout(nivel3_DesafioReconstruccion, 2000);
+                                    }
+                                },
+                                color: "danger"
+                            }
+                        ];
+                        
+                        mostrarOpciones(subOpciones);
+                    },
+                    color: "info"
+                },
+                {
+                    texto: "Puerta de Acceso Directo",
+                    accion: function() {
+                        if (Math.random() > 0.5) {
+                            conocimiento += 1;
+                            itemsObtenidos.push("atajo_seguro");
+                            mostrarNarrativa("Encuentras un atajo seguro hacia el siguiente nivel.");
+                            setTimeout(nivel3_DesafioReconstruccion, 2000);
+                        } else {
+                            intentosRestantes -= 1;
+                            mostrarNarrativa("⚠️ Error en la ruta! El atajo te lleva a una zona peligrosa.");
+                            if (verificarEstado()) {
+                                setTimeout(nivel3_DesafioReconstruccion, 2000);
+                            }
+                        }
+                    },
+                    color: "warning"
+                }
+            ];
+            
+            mostrarOpciones(opciones);
+        }
+        
+        function nivel3_DesafioReconstruccion() {
+            if (!verificarEstado()) return;
+            
+            nivel = 3;
+            mostrarEstado();
+            mostrarNarrativa("NIVEL 3: Desafío de Reconstrucción\n\nCRUDY presenta un patrón que debes memorizar y replicar:\n\n[Azul, Rojo, Verde, Azul]");
+            
+            setTimeout(() => {
+                mostrarNarrativa("El patrón ha desaparecido. ¿Puedes recordarlo?");
+                
+                const opciones = [
+                    {
+                        texto: "[Azul, Rojo, Verde, Azul]",
+                        accion: function() {
+                            conocimiento += 2;
+                            itemsObtenidos.push("modulo_memoria");
+                            mostrarNarrativa("✅ Exacto! Has replicado el patrón correctamente. Ganaste un módulo de memoria.");
+                            setTimeout(nivel4_LogicaFractal, 2000);
+                        },
+                        color: "success"
+                    },
+                    {
+                        texto: "[Rojo, Azul, Verde, Azul]",
+                        accion: function() {
+                            intentosRestantes -= 1;
+                            mostrarNarrativa("❌ Incorrecto. El primer color debería ser Azul, no Rojo.");
+                            if (verificarEstado()) {
+                                setTimeout(nivel4_LogicaFractal, 2000);
+                            }
+                        },
+                        color: "danger"
+                    },
+                    {
+                        texto: "[Azul, Rojo, Verde, Rojo]",
+                        accion: function() {
+                            intentosRestantes -= 1;
+                            mostrarNarrativa("❌ Casi! El último color era Azul, no Rojo.");
+                            if (verificarEstado()) {
+                                setTimeout(nivel4_LogicaFractal, 2000);
+                            }
+                        },
+                        color: "danger"
+                    }
+                ];
+                
+                mostrarOpciones(opciones);
+            }, 3000);
+        }
+        
+        function nivel4_LogicaFractal() {
+            if (!verificarEstado()) return;
+            
+            nivel = 4;
+            mostrarEstado();
+            mostrarNarrativa("NIVEL 4: Lógica Fractal\n\nCRUDY presenta un problema:\n\nSistema IF:\n- SI A ENTONCES B\n- SI B ENTONCES C\n- SI C ENTONCES D\n\nSabemos que A es VERDADERO. ¿Cuál es la salida?");
+            
+            const opciones = [
+                {
+                    texto: "Salida: B",
+                    accion: function() {
+                        intentosRestantes -= 1;
+                        mostrarNarrativa("❌ Incorrecto. Si A es verdadero, entonces B es verdadero, pero también se sigue que C y D son verdaderos.");
+                        if (verificarEstado()) {
+                            setTimeout(nivel5_JuicioNucleo, 2000);
+                        }
+                    },
+                    color: "danger"
+                },
+                {
+                    texto: "Salida: C",
+                    accion: function() {
+                        intentosRestantes -= 1;
+                        mostrarNarrativa("❌ Parcialmente correcto. C es verdadero, pero no es la salida final.");
+                        if (verificarEstado()) {
+                            setTimeout(nivel5_JuicioNucleo, 2000);
+                        }
+                    },
+                    color: "warning"
+                },
+                {
+                    texto: "Salida: D",
+                    accion: function() {
+                        conocimiento += 3;
+                        mostrarNarrativa("✅ Correcto! La cadena lógica culmina en D.");
+                        setTimeout(nivel5_JuicioNucleo, 2000);
+                    },
+                    color: "success"
+                }
+            ];
+            
+            mostrarOpciones(opciones);
+        }
+        
+        function nivel5_JuicioNucleo() {
+            if (!verificarEstado()) return;
+            
+            nivel = 5;
+            mostrarEstado();
+            mostrarNarrativa("NIVEL 5: Juicio del Núcleo\n\nCRUDY: Esta es mi prueba final. Responde correctamente para acceder a mi núcleo.");
+            
+            const opciones = [
+                {
+                    texto: "(2 == '2') es...",
+                    accion: function() {
+                        mostrarNarrativa("CRUDY: Interesante. Ahora la segunda pregunta:\n\nQué imprime: console.log([] + []);");
+                        
+                        const segundaPregunta = [
+                            {
+                                texto: "[]",
+                                accion: function() {
+                                    intentosRestantes -= 1;
+                                    mostrarNarrativa("❌ Incorrecto. En JavaScript, arrays vacíos concatenados devuelven un string vacío.");
+                                    finalizarJuego();
+                                },
+                                color: "danger"
+                            },
+                            {
+                                texto: "'' (string vacío)",
+                                accion: function() {
+                                    conocimiento += 2;
+                                    mostrarNarrativa("✅ Correcto! Ahora la última pregunta:\n\nEn JavaScript, qué es 0 || 1 && 2 || 3");
+                                    
+                                    const terceraPregunta = [
+                                        {
+                                            texto: "0",
+                                            accion: function() {
+                                                intentosRestantes -= 1;
+                                                mostrarNarrativa("❌ Incorrecto. Recuerda que AND (&&) tiene precedencia sobre OR (||).");
+                                                finalizarJuego();
+                                            },
+                                            color: "danger"
+                                        },
+                                        {
+                                            texto: "2",
+                                            accion: function() {
+                                                conocimiento += 5;
+                                                mostrarNarrativa("✅ Excelente! Has dominado la precedencia de operadores.");
+                                                finalizarJuego(true);
+                                            },
+                                            color: "success"
+                                        },
+                                        {
+                                            texto: "1",
+                                            accion: function() {
+                                                intentosRestantes -= 1;
+                                                mostrarNarrativa("❌ Casi! El resultado es 2 porque 1 && 2 evalúa a 2, y 0 || 2 evalúa a 2.");
+                                                finalizarJuego();
+                                            },
+                                            color: "warning"
+                                        }
+                                    ];
+                                    
+                                    mostrarOpciones(terceraPregunta);
+                                },
+                                color: "success"
+                            },
+                            {
+                                texto: "undefined",
+                                accion: function() {
+                                    intentosRestantes -= 1;
+                                    mostrarNarrativa("❌ No. En JavaScript, arrays vacíos concatenados devuelven un string vacío.");
+                                    finalizarJuego();
+                                },
+                                color: "danger"
+                            }
+                        ];
+                        
+                        mostrarOpciones(segundaPregunta);
+                    },
+                    color: "info"
+                },
+                {
+                    texto: "(2 === '2') es...",
+                    accion: function() {
+                        intentosRestantes -= 1;
+                        mostrarNarrativa("❌ No, esa es la respuesta a la comparación estricta. Vuelve a intentarlo.");
+                        if (verificarEstado()) {
+                            setTimeout(nivel5_JuicioNucleo, 1000);
+                        }
+                    },
+                    color: "danger"
+                }
+            ];
+            
+            mostrarOpciones(opciones);
+        }
+        
+        function finalizarJuego(exito = false) {
+            if (exito || conocimiento >= 10) {
+                mostrarNarrativa(`✨ CRUDY: Impresionante. Has accedido a mi núcleo con ${conocimiento} puntos de conocimiento. Sistemas liberados.`);
+            } else if (conocimiento >= 5) {
+                mostrarNarrativa("CRUDY: Rendimiento aceptable. Otorgaré acceso limitado a mis sistemas.");
+            } else {
+                mostrarNarrativa("⛔ CRUDY: Nivel de conocimiento insuficiente. Acceso denegado.");
+            }
+            
+            limpiarOpciones();
+            optionsContainer.appendChild(crearBoton('Reiniciar Juego', iniciarJuego, 'primary'));
+        }
+        
+        // Inicialización
+        startBtn.addEventListener('click', iniciarJuego);
+        mostrarEstado();
