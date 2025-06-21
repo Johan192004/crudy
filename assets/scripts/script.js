@@ -9,79 +9,65 @@ let decisionPath = [];
 var storyText = document.getElementById('story-text');
 var optionsContainer = document.getElementById('options-container');
 var statusDisplay = document.getElementById('status-display');
-var startBtn = document.getElementById('start-btn');
+
 
 // Funciones del juego
-function mostrarEstado() {
-    statusDisplay.innerHTML = `
+function mostrarEstado(status) {
+    status.innerHTML = `
         <div><strong>Nivel:</strong> ${nivel}/5</div>
-        <div><strong>Intentos:</strong> ${intentosRestantes}</div>    `;
+        <div><strong>Vidas:</strong> ${intentosRestantes}</div>    `;
 }
 
-const nivel4 = function(){
-    // <div class="narrative-box grow-anim text-align-center">
-    //                 <p id="story-text" class="lead">CRUDY te desafía a recordar la secuencia de colores para continuar.</p>
-    //             </div>
+function nivel4(){
+    nivel = 4
+    storyText = document.getElementById("story-text")
+    statusDisplay = document.getElementById("status-display")
+    mostrarEstado(statusDisplay)
 
-    //             <div class="text-center mb-4 other">
-    //                 <button id="start-sequence" class="btn btn-option btn-lg">Mostrar Secuencia</button>
-    //                 <button id="retry-sequence" class="btn btn-option btn-lg d-none">Reintentar</button>
-    //             </div>
-
-    //             <div class="d-flex justify-content-around my-3 block2">
-    //                 <button class="btn btn-danger color-btn" data-color="red"></button>
-    //                 <button class="btn btn-success color-btn" data-color="green"></button>
-    //                 <button class="btn btn-warning color-btn" data-color="yellow"></button>
-    //                 <button class="btn btn-primary color-btn" data-color="blue"></button>
-    //             </div>
-
-    //             <div class="text-center text-status">
-    //                 <p id="level3-feedback" class="lead"></p>
-    //             </div>`
-
-    storyText = document.getElementById('story-text');
-    optionsContainer = document.getElementById('options-container');
-    statusDisplay = document.getElementById('status-display');
-    startBtn = document.getElementById('start-btn');
-
-    document.querySelector(".other").remove()
-    document.querySelector(".block2").remove()
-    document.querySelector(".text-status").remove()
-
-    document.querySelector(".col-md-8").innerHTML += `<div id="options-container" class="text-center"></div>`
-
-    mostrarEstado()
-    agregarBoton("El nodo D está apagado", true)
-    agregarBoton("El nodo D está activo")
-    agregarBoton("El nodo D depende del nodo B")
-    agregarBoton("El nodo D no cambia su estado")
-    mostrarNarrativa(`NIVEL 4:Si el nodo A está activo, entonces el nodo B también se activa. Si el nodo B está activo, entonces el nodo C se apaga. Si el nodo C está apagado, entonces el nodo D se activa. El nodo A está activo.
+  
+    mostrarNarrativa(storyText,`NIVEL 4:Si el nodo A está activo, entonces el nodo B también se activa. Si el nodo B está activo, entonces el nodo C se apaga. Si el nodo C está apagado, entonces el nodo D se activa. El nodo A está activo.
 
 ¿Cuál es el estado final del nodo D?`)
+    
+    optionsContainer = document.getElementById("options-container")
+
+    agregarBoton(optionsContainer,"El nodo D está apagado", true)
+    agregarBoton(optionsContainer,"El nodo D está activo")
+    agregarBoton(optionsContainer,"El nodo D depende del nodo B")
+    agregarBoton(optionsContainer,"El nodo D no cambia su estado")
 
 
     for (let boton of optionsContainer.children ){
         if(boton.textContent.includes("D está activo")){
             boton.addEventListener("click",(e)=>{
-                mostrarNarrativa("Pasaste de nivel")
+                mostrarNarrativa(storyText,"Pasaste de nivel")
+                setTimeout(nivel5,2000)
             })
         }else {
             boton.addEventListener("click",(e)=>{
-                mostrarNarrativa("Te equivocaste, has perdido una vida")
+                mostrarNarrativa(storyText,"Te equivocaste, has perdido una vida")
                 intentosRestantes--
-                setTimeout(nivel4,2000)
+                if(intentosRestantes <= -1){
+                    setTimeout(reinicio,2000)
+                } else {
+                    setTimeout(()=>{
+                        nivel4()
+                    },2000)
+                }
             })
         }
     } 
 }
 
 const nivel3 = function(){
+    nivel = 3
     let colores = ["red", "green", "yellow", "blue"];
     let secuencia = [];
     let secuenciaJugador = [];
     let vidas = 3;
 
-    optionsContainer.remove()
+    // optionsContainer.remove()
+    limpiarBotones(optionsContainer)
 
     let qwe = document.querySelector(".col-md-8")
 
@@ -115,7 +101,9 @@ const nivel3 = function(){
     const estado = document.getElementById("status-display");
 
     function actualizarEstado () {
-        estado.innerHTML = `<p> Vidas: ${vidas}</p>`;
+        estado.innerHTML = `
+        <div><strong>Nivel:</strong> ${nivel}/5</div>
+        <div><strong>Vidas:</strong> ${intentosRestantes}</div>    `;
     }
 
     function generarSecuencia () {
@@ -166,14 +154,18 @@ const nivel3 = function(){
         let indice = secuenciaJugador.length - 1;
 
         if (secuenciaJugador[indice] !== secuencia[indice]) {
-            vidas--;
+            intentosRestantes--;
             actualizarEstado();
-            feedback.textContent = `¡Fallaste! Te quedan ${vidas} vidas.`;
+            feedback.textContent = `¡Fallaste! Te quedan ${intentosRestantes} vidas.`;
+            estado.innerHTML = `
+                <div><strong>Nivel:</strong> ${nivel}/5</div>
+                <div><strong>Vidas:</strong> ${intentosRestantes}</div>    `
 
-            if (vidas <= 0) {
+            if (intentosRestantes <= -1) {
                 feedback.textContent = `Juego Terminado. Te has quedado sin vidas.`;
-                desactivarBotones ();
-                btnReintentar.classList.remove("d-none");
+                // desactivarBotones ();
+                // btnReintentar.classList.remove("d-none");
+                setTimeout(reinicio,2000)
                 return;
             }
 
@@ -187,8 +179,27 @@ const nivel3 = function(){
             feedback.textContent = `¡Correcto! Has pasado el desafio.`;
             desactivarBotones();
             btnReintentar.classList.add("d-none");
-            setTimeout(nivel4,2000)
-        }
+            setTimeout(()=>{
+                console.log(storyText)
+                console.log(optionsContainer)
+                console.log(statusDisplay)
+
+                document.querySelectorAll(".narrative-box")[1].classList.toggle("d-none")
+                document.querySelectorAll(".narrative-box")[0].classList.toggle("d-none")
+                document.querySelectorAll(".narrative-box")[0].innerHTML = `
+                <p id="story-text" class="lead"></p>`
+
+
+
+                // storyText = document.getElementById('story-text');
+                // optionsContainer = document.getElementById('options-container');
+                // statusDisplay = document.getElementById('status-display');
+
+                document.querySelector(".other").remove()
+                document.querySelector(".block2").remove()
+                document.querySelector(".text-status").remove()
+                nivel4()        },2000)
+                    }
     }
 
     btnMostrar.addEventListener("click", function () {
@@ -210,41 +221,42 @@ const nivel3 = function(){
     actualizarEstado();
 }
 
-function mostrarNarrativa(texto) {
-    storyText.textContent = texto;
+function mostrarNarrativa(container,texto) {
+    container.textContent = texto;
 }
 
 function reiniciarJuego() {
     nivel = 0;
     conocimiento = 0;
     intentosRestantes = 3;
-    mostrarEstado();
+    mostrarEstado(statusDisplay);
 }
 
 //s
 
 
-function agregarBoton(texto,limpiar = false){
+function agregarBoton(container,texto,limpiar = false){
     if (limpiar){
-        limpiarBotones()
+        limpiarBotones(container)
     }
-    optionsContainer.innerHTML += `<button class="btn btn-option btn-lg"><strong>${texto}</strong></button>`
+    container.innerHTML += `<button class="btn btn-option btn-lg"><strong>${texto}</strong></button>`
 }
 
-function limpiarBotones(){
-    optionsContainer.innerHTML = ""
+function limpiarBotones(options){
+    options.innerHTML = ""
 }
 
 function nivel1(){
+    nivel = 1
     // let botonBienvenida = document.querySelector(".bienvenida")
 
     // botonBienvenida.remove()
 
-    mostrarEstado()
-    agregarBoton("🚪Puerta 1", true)
-    agregarBoton("🚪Puerta 2")
-    agregarBoton("🚪Puerta 3")
-    mostrarNarrativa("NIVEL 1: Inicio del Protocolo\n\nCRUDY despierta y te da la bienvenida como posible operador. Antes de acceder al sistema, debes elegir una ruta:")
+    mostrarEstado(statusDisplay)
+    agregarBoton(optionsContainer,"🚪Puerta 1", true)
+    agregarBoton(optionsContainer,"🚪Puerta 2")
+    agregarBoton(optionsContainer,"🚪Puerta 3")
+    mostrarNarrativa(storyText,"NIVEL 1: Inicio del Protocolo\n\nCRUDY despierta y te da la bienvenida como posible operador. Antes de acceder al sistema, debes elegir una ruta:")
 
     let puertaMala = numeroAleatorio(1,3)
     console.log(puertaMala)
@@ -253,11 +265,15 @@ function nivel1(){
         boton.addEventListener("click",(e)=>{
             let numeroBoton = parseInt(e.target.textContent.at(-1))
             if (numeroBoton === puertaMala){
-                mostrarNarrativa("Puerta equivocada, perdiste una vida")
+                mostrarNarrativa(storyText,"Puerta equivocada, perdiste una vida")
                 intentosRestantes--
-                setTimeout(nivel1,2000)
+                if(intentosRestantes <= -1){
+                    setTimeout(reinicio,2000)
+                } else {
+                    setTimeout(nivel1,2000)
+                }
             } else {
-                mostrarNarrativa("Pasaste de nivel")
+                mostrarNarrativa(storyText,"Pasaste de nivel")
                 setTimeout(nivel2,2000)
             }
         })
@@ -274,7 +290,7 @@ function numeroAleatorio(min, max) {
 function nivel2() {
     document.querySelector(".narrative-box").classList.remove("grow-anim")
     nivel = 2;
-    mostrarEstado();
+    mostrarEstado(statusDisplay);
 
     storyText.innerHTML = "<strong>NIVEL 2: Laberinto de Decisión</strong><br>CRUDY te muestra 3 puertas. Elige bien la puerta para continuar, puedes perderlo todo...";
 
@@ -315,17 +331,22 @@ function puerta2() {
 function responderCompleja(respuesta) {
     if (respuesta === true) {
         storyText.innerHTML = "✅ ¡Correcto! CRUDY está sorprendido por tu lógica.";
-        conocimiento++;
+        setTimeout(nivel3,2000)
     } else {
         storyText.innerHTML = "❌ Incorrecto. La expresión es verdadera.";
         intentosRestantes--;
+        if(intentosRestantes <= -1){
+            setTimeout(reinicio,2000)
+        } else {
+            setTimeout(nivel2,2000)
+        }
     }
 
-    mostrarEstado();
-    if (verificarEstado()) {
-        limpiarOpciones();
-        optionsContainer.appendChild(crearBoton("Continuar al Nivel 3", nivel3, "secondary"));
-    }
+    mostrarEstado(statusDisplay);
+    // if (verificarEstado()) {
+    //     limpiarOpciones();
+    //     optionsContainer.appendChild(crearBoton("Continuar al Nivel 3", nivel3, "secondary"));
+    // }
 }
 
 // Puerta 3: suerte aleatoria
@@ -341,7 +362,13 @@ function puerta3() {
     } else {
         storyText.innerHTML = "⚠️ El atajo te llevó a una zona peligrosa. Pierdes un intento.";
         intentosRestantes--;
-        setTimeout(nivel2,3000)
+        if(intentosRestantes <= -1){
+            setTimeout(reinicio,2000)
+        } else {
+            
+        
+            setTimeout(nivel2,3000)
+        }
     }
 
     // mostrarEstado();
@@ -363,14 +390,6 @@ function crearBoton(texto, accion, tipo = 'primary') {
     return btn;
 }
 
-// Nivel 3 (placeholder)
-function nivel33() {
-    nivel = 3;
-    storyText.innerHTML = "<strong>NIVEL 3: Aquí inicia el siguiente desafío...</strong>";
-    limpiarOpciones();
-    mostrarEstado();
-    setTimeout(nivel4,2000)
-}
 
 
 
@@ -378,28 +397,132 @@ function nivel33() {
 // Inicialización
 nivel1()
 
-function inicio(){
-    let bienvenida = document.querySelector(".row")
 
-    bienvenida.classList.add("d-flex")
-    bienvenida.classList.add("justify-content-center")
-    bienvenida.classList.add("align-items-center")
-    bienvenida.classList.add("flex-column")
+function nivel5(){
+    nivel = 5
+    statusDisplay = document.getElementById("status-display")
+    mostrarEstado(statusDisplay)
+    storyText = document.getElementById("story-text")
+    storyText.innerText = `NIVEL 5: ¿Qué imprime este código en Python? 
 
-    document.querySelector(".status-panel").classList.toggle("d-none")
-    document.querySelector(".narrative-box").classList.toggle("d-none")
-    document.getElementById("options-container").classList.toggle("d-none")
+                        for i in range(1, 6):
+                        if i % 2 == 0:
+                        print(i)`
+    
+
+    optionsContainer = document.getElementById("options-container")
+    agregarBoton(optionsContainer,"A. 1 3 5",true)
+    agregarBoton(optionsContainer,"B. 2 4")
+    agregarBoton(optionsContainer,"C. 1 2 3 4 5")
+    agregarBoton(optionsContainer,"D. 0 2 4 6")
+
+
+    for (let boton of optionsContainer.children ){
+        if(boton.textContent.includes(". 2 4")){
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Correcto!!")
+                setTimeout(Nivel5_1,3000)
+            })
+        }else {
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Te equivocaste, has perdido una vida")
+                intentosRestantes--
+                if(intentosRestantes <= -1){
+                    setTimeout(reinicio,2000)
+                } else {
+                    setTimeout(nivel5,3000)
+                }
+            })
+        }
+    } 
+}
 
     
-    bienvenida.innerHTML += `<button class="btn btn-primary m-2 bienvenida" style="width:auto">Bienvenido al JUEGO</button>`;
 
-    let botonBienvenida = document.querySelector(".bienvenida")
+function Nivel5_1(){
+    statusDisplay = document.getElementById('status-display');
+    storyText = document.getElementById("story-text")
+    optionsContainer = document.getElementById("options-container")
+    mostrarEstado(statusDisplay)
+    mostrarNarrativa(storyText,"¿Qué es una variable en programación?")
+    agregarBoton(optionsContainer,"A. Un número que nunca cambia",true)
+    agregarBoton(optionsContainer,"B. Un espacio en memoria que guarda un valor")
+    agregarBoton(optionsContainer,"C. Un error del sistema")
+    agregarBoton(optionsContainer,"D. Un comando que imprime datos")
 
-    botonBienvenida.addEventListener("click",(e)=>{
-        document.querySelector(".status-panel").classList.toggle("d-none")
-        document.querySelector(".narrative-box").classList.toggle("d-none")
-        document.getElementById("options-container").classList.toggle("d-none")
-            
-        nivel1()
-    })
+
+    for (let boton of optionsContainer.children ){
+        if(boton.textContent.includes("guarda un valor")){
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Correcto!!")
+                setTimeout(Nivel5_2,3000)
+            })
+        }else {
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Te equivocaste, has perdido una vida")
+                intentosRestantes--
+                if(intentosRestantes <= -1){
+                    setTimeout(reinicio,2000)
+                } else {
+                    
+                
+                    setTimeout(Nivel5_1,3000)
+                }
+            })
+        }
+    } 
+
 }
+
+function Nivel5_2(){
+    statusDisplay = document.getElementById('status-display');
+    storyText = document.getElementById("story-text")
+    optionsContainer = document.getElementById("options-container")
+    mostrarEstado(statusDisplay)
+    mostrarNarrativa(storyText,"Si un programa es lento, ¿qué debes hacer primero?")
+    agregarBoton(optionsContainer,"A. Borrar el código",true)
+    agregarBoton(optionsContainer,"B. Medir tiempos y analizar funciones lentas")
+    agregarBoton(optionsContainer,"C. Cambiar de lenguaje de programación")
+    agregarBoton(optionsContainer,"D. Reiniciar la computadora")
+
+
+    for (let boton of optionsContainer.children ){
+        if(boton.textContent.includes("funciones lentas")){
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Correcto!!")
+                setTimeout(Nivel5_3,3000)
+            })
+        }else {
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa(storyText,"Te equivocaste, has perdido una vida")
+                intentosRestantes--
+                if(intentosRestantes <= -1){
+                    setTimeout(reinicio,2000)
+                } else {
+                    setTimeout(Nivel5_2,3000)
+                }
+            })
+        }
+    } 
+
+}
+
+function Nivel5_3(){
+    storyText = document.getElementById("story-text")
+    optionsContainer = document.getElementById("options-container")
+    mostrarNarrativa(storyText,"¡CONGRATULATIONS! Has completado el reto")
+    limpiarBotones(optionsContainer)
+}
+
+function reinicio(){
+
+    statusDisplay = document.getElementById('status-display');
+    storyText = document.getElementById("story-text")
+    optionsContainer = document.getElementById("options-container")
+    mostrarNarrativa(storyText,"Te quedaste sin vidas, perdiste. Volveras al nivel 1")
+    intentosRestantes = 3
+    limpiarBotones(optionsContainer)
+    setTimeout(nivel1,3000)
+    
+}
+
