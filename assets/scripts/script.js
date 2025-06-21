@@ -6,16 +6,208 @@ let itemsObtenidos = [];
 let decisionPath = [];
 
 // Elementos DOM
-const storyText = document.getElementById('story-text');
-const optionsContainer = document.getElementById('options-container');
-const statusDisplay = document.getElementById('status-display');
-const startBtn = document.getElementById('start-btn');
+var storyText = document.getElementById('story-text');
+var optionsContainer = document.getElementById('options-container');
+var statusDisplay = document.getElementById('status-display');
+var startBtn = document.getElementById('start-btn');
 
 // Funciones del juego
 function mostrarEstado() {
     statusDisplay.innerHTML = `
         <div><strong>Nivel:</strong> ${nivel}/5</div>
         <div><strong>Intentos:</strong> ${intentosRestantes}</div>    `;
+}
+
+const nivel4 = function(){
+    // <div class="narrative-box grow-anim text-align-center">
+    //                 <p id="story-text" class="lead">CRUDY te desafía a recordar la secuencia de colores para continuar.</p>
+    //             </div>
+
+    //             <div class="text-center mb-4 other">
+    //                 <button id="start-sequence" class="btn btn-option btn-lg">Mostrar Secuencia</button>
+    //                 <button id="retry-sequence" class="btn btn-option btn-lg d-none">Reintentar</button>
+    //             </div>
+
+    //             <div class="d-flex justify-content-around my-3 block2">
+    //                 <button class="btn btn-danger color-btn" data-color="red"></button>
+    //                 <button class="btn btn-success color-btn" data-color="green"></button>
+    //                 <button class="btn btn-warning color-btn" data-color="yellow"></button>
+    //                 <button class="btn btn-primary color-btn" data-color="blue"></button>
+    //             </div>
+
+    //             <div class="text-center text-status">
+    //                 <p id="level3-feedback" class="lead"></p>
+    //             </div>`
+
+    storyText = document.getElementById('story-text');
+    optionsContainer = document.getElementById('options-container');
+    statusDisplay = document.getElementById('status-display');
+    startBtn = document.getElementById('start-btn');
+
+    document.querySelector(".other").remove()
+    document.querySelector(".block2").remove()
+    document.querySelector(".text-status").remove()
+
+    document.querySelector(".col-md-8").innerHTML += `<div id="options-container" class="text-center"></div>`
+
+    mostrarEstado()
+    agregarBoton("El nodo D está apagado", true)
+    agregarBoton("El nodo D está activo")
+    agregarBoton("El nodo D depende del nodo B")
+    agregarBoton("El nodo D no cambia su estado")
+    mostrarNarrativa(`NIVEL 4:Si el nodo A está activo, entonces el nodo B también se activa. Si el nodo B está activo, entonces el nodo C se apaga. Si el nodo C está apagado, entonces el nodo D se activa. El nodo A está activo.
+
+¿Cuál es el estado final del nodo D?`)
+
+
+    for (let boton of optionsContainer.children ){
+        if(boton.textContent.includes("D está activo")){
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa("Pasaste de nivel")
+            })
+        }else {
+            boton.addEventListener("click",(e)=>{
+                mostrarNarrativa("Te equivocaste, has perdido una vida")
+                intentosRestantes--
+                setTimeout(nivel4,2000)
+            })
+        }
+    } 
+}
+
+const nivel3 = function(){
+    let colores = ["red", "green", "yellow", "blue"];
+    let secuencia = [];
+    let secuenciaJugador = [];
+    let vidas = 3;
+
+    optionsContainer.remove()
+
+    let qwe = document.querySelector(".col-md-8")
+
+    document.querySelector(".narrative-box").classList.toggle("d-none")
+
+    qwe.innerHTML += `
+    <div class="narrative-box grow-anim text-align-center">
+                    <p id="story-text" class="lead">CRUDY te desafía a recordar la secuencia de colores para continuar.</p>
+                </div>
+
+                <div class="text-center mb-4 other">
+                    <button id="start-sequence" class="btn btn-option btn-lg">Mostrar Secuencia</button>
+                    <button id="retry-sequence" class="btn btn-option btn-lg d-none">Reintentar</button>
+                </div>
+
+                <div class="d-flex justify-content-around my-3 block2">
+                    <button class="btn btn-danger color-btn" data-color="red"></button>
+                    <button class="btn btn-success color-btn" data-color="green"></button>
+                    <button class="btn btn-warning color-btn" data-color="yellow"></button>
+                    <button class="btn btn-primary color-btn" data-color="blue"></button>
+                </div>
+
+                <div class="text-center text-status">
+                    <p id="level3-feedback" class="lead"></p>
+                </div>`
+
+    const botonesColores = document.querySelectorAll(".color-btn");
+    const btnMostrar = document.getElementById ("start-sequence");
+    const btnReintentar = document.getElementById("retry-sequence");
+    const feedback = document.getElementById("level3-feedback");
+    const estado = document.getElementById("status-display");
+
+    function actualizarEstado () {
+        estado.innerHTML = `<p> Vidas: ${vidas}</p>`;
+    }
+
+    function generarSecuencia () {
+        secuencia = [];
+        for (let i = 0; i < 4; i++) {
+            let colorAleatorio = colores[Math.floor(Math.random() * colores.length)];
+            secuencia.push(colorAleatorio);
+        }
+    }
+
+    function mostrarSecuencia() {
+        let tiempo = 600;
+        secuenciaJugador = [];
+        feedback.textContent = "Observa la secuencia";
+        desactivarBotones();
+
+        secuencia.forEach((color, i) => {
+            setTimeout(() => {
+                let boton = document.querySelector(`.color-btn[data-color="${color}"]`);
+                boton.classList.add("active");
+                setTimeout(() => {
+                    boton.classList.remove("active");
+                }, 300);
+            }, tiempo * (i + 1));
+        });
+
+        setTimeout (() => {
+            feedback.textContent = "¡Ahora repite la secuencia!";
+            activarBotones();
+        }, tiempo * secuencia.length + 500);
+    }
+
+    function activarBotones () {
+        botonesColores.forEach(boton => {
+            boton.addEventListener("click", manejarClick);
+        });
+    }
+
+    function desactivarBotones () {
+        botonesColores.forEach(boton => {
+            boton.removeEventListener ("click", manejarClick);
+        });
+    }
+
+    function manejarClick(e) {
+        let colorPresionado = e.target.dataset.color;
+        secuenciaJugador.push(colorPresionado);
+        let indice = secuenciaJugador.length - 1;
+
+        if (secuenciaJugador[indice] !== secuencia[indice]) {
+            vidas--;
+            actualizarEstado();
+            feedback.textContent = `¡Fallaste! Te quedan ${vidas} vidas.`;
+
+            if (vidas <= 0) {
+                feedback.textContent = `Juego Terminado. Te has quedado sin vidas.`;
+                desactivarBotones ();
+                btnReintentar.classList.remove("d-none");
+                return;
+            }
+
+            secuenciaJugador = [];
+            desactivarBotones();
+            btnReintentar.classList.remove("d-none");
+            return;
+        }
+
+        if (secuenciaJugador.length === secuencia.length) {
+            feedback.textContent = `¡Correcto! Has pasado el desafio.`;
+            desactivarBotones();
+            btnReintentar.classList.add("d-none");
+            setTimeout(nivel4,2000)
+        }
+    }
+
+    btnMostrar.addEventListener("click", function () {
+        vidas = 3;
+        actualizarEstado();
+        generarSecuencia();
+        mostrarSecuencia();
+        btnReintentar.classList.add("d-none");
+    });
+
+    btnReintentar.addEventListener("click", function () {
+        vidas = 3;
+        actualizarEstado();
+        generarSecuencia();
+        mostrarSecuencia();
+        btnReintentar.classList.add("d-none");
+    });
+
+    actualizarEstado();
 }
 
 function mostrarNarrativa(texto) {
@@ -142,7 +334,7 @@ function puerta3() {
 
     if (exito) {
         storyText.innerHTML = "🎉 Has encontrado un atajo seguro. CRUDY te permite avanzar.";
-        setTimeout(nivel4,3000)
+        setTimeout(nivel3,3000)
 
     } else {
         storyText.innerHTML = "⚠️ El atajo te llevó a una zona peligrosa. Pierdes un intento.";
@@ -170,7 +362,7 @@ function crearBoton(texto, accion, tipo = 'primary') {
 }
 
 // Nivel 3 (placeholder)
-function nivel3() {
+function nivel33() {
     nivel = 3;
     storyText.innerHTML = "<strong>NIVEL 3: Aquí inicia el siguiente desafío...</strong>";
     limpiarOpciones();
@@ -180,31 +372,7 @@ function nivel3() {
 
 
 
-function nivel4(){
-    mostrarEstado()
-    agregarBoton("El nodo D está apagado", true)
-    agregarBoton("El nodo D está activo")
-    agregarBoton("El nodo D depende del nodo B")
-    agregarBoton("El nodo D no cambia su estado")
-    mostrarNarrativa(`NIVEL 4:Si el nodo A está activo, entonces el nodo B también se activa. Si el nodo B está activo, entonces el nodo C se apaga. Si el nodo C está apagado, entonces el nodo D se activa. El nodo A está activo.
 
-¿Cuál es el estado final del nodo D?`)
-
-
-    for (let boton of optionsContainer.children ){
-        if(boton.textContent.includes("D está activo")){
-            boton.addEventListener("click",(e)=>{
-                mostrarNarrativa("Pasaste de nivel")
-            })
-        }else {
-            boton.addEventListener("click",(e)=>{
-                mostrarNarrativa("Te equivocaste, has perdido una vida")
-                intentosRestantes--
-                setTimeout(nivel4,2000)
-            })
-        }
-    } 
-}
 // Inicialización
 nivel1()
 

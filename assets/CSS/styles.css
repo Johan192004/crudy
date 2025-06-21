@@ -60,6 +60,17 @@ body {
     50% { opacity: 0.5; }
 }
 
+.color-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    opacity: 0.6;
+}
+.color-btn.active {
+    opacity: 1;
+    box-shadow: 0 0 10px white;
+}
+
 @keyframes growIn{
     from {
         transform: scale(0.3);
