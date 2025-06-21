@@ -51,6 +51,7 @@ function iniciar(){
         if(boton.textContent.includes("D está activo")){
             boton.addEventListener("click",(e)=>{
                 mostrarHistoria("Pasaste de nivel")
+                setTimeout()
             })
         }else {
             boton.addEventListener("click",(e)=>{
