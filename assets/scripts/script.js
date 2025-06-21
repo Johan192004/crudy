@@ -221,6 +221,8 @@ function reiniciarJuego() {
     mostrarEstado();
 }
 
+//s
+
 
 function agregarBoton(texto,limpiar = false){
     if (limpiar){
