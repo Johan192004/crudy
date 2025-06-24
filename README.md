@@ -1,7 +1,6 @@
 # CRUDY - El Desafío Lógico
 
-**Equipo de Desarrollo:** [Nombre del Equipo]
-
+**Equipo de Desarrollo:** JJJB
 ## Descripción General
 
 CRUDY es un juego interactivo de aventura y lógica donde los jugadores deben superar diferentes niveles de desafíos mentales para convertirse en operadores certificados del sistema de inteligencia artificial CRUDY. La historia se desarrolla en un ambiente futurista donde el jugador debe demostrar sus habilidades lógicas y de toma de decisiones para avanzar a través de múltiples niveles.
@@ -63,7 +62,7 @@ crudy-juego/
 - **Nivel 2:** Laberinto de decisión con múltiples rutas
 - **Nivel 3:** Transición narrativa
 - **Nivel 4:** Desafío de lógica proposicional con nodos
-- **Nivel 5:** [En desarrollo]
+- **Nivel 5:** Preguntas de lógica de programación.
 
 ### Gestión de Estado
 - Seguimiento de vidas restantes
@@ -104,11 +103,11 @@ El juego está estructurado de manera modular con las siguientes característica
 
 ## Aportes de Cada Integrante
 
-*[Esta sección debe ser completada por el equipo con los aportes específicos de cada miembro]*
-
-- **[Johan ]:** [Descripción de aportes]
-- **[Nombre 2]:** [Descripción de aportes]
-- **[Nombre 3]:** [Descripción de aportes]
+- **Johan ramirez Marin:** Nivel 1 y 4
+- **Juan Daniel Rua marin:** Nivel 5
+- **Juan Manuel Arango Arana:** Nivel 3
+- **Brahiam Ruiz Alzate** Nivel 2
+ 
 
 ##  Lecciones Aprendidas
 
@@ -130,7 +129,7 @@ El juego está estructurado de manera modular con las siguientes característica
 
 ## Estado del Proyecto
 
-**Estado Actual:** En Desarrollo
+**Estado Actual:** Finalizado
 
 ### Funcionalidades Completadas 
 - Sistema básico de navegación entre niveles
@@ -139,21 +138,10 @@ El juego está estructurado de manera modular con las siguientes característica
 - Sistema de vidas y progresión
 - Diseño responsivo
 
-### Funcionalidades Pendientes 
-- Nivel 5 y niveles adicionales
-- Sistema de puntuación más complejo
-- Efectos de sonido y música
-- Sistema de guardado de progreso
-- Modo multijugador
-- Optimizaciones de rendimiento
 
 ### Próximos Pasos
-1. Completar la implementación del Nivel 5
-2. Añadir más variedad en los tipos de desafíos
-3. Implementar sistema de achievements
-4. Mejorar la accesibilidad del juego
-5. Realizar pruebas exhaustivas en diferentes dispositivos
+1. Añadir más variedad en los tipos de desafíos
+2. Implementar sistema de achievements
+3. Mejorar la accesibilidad del juego
+4. Realizar pruebas exhaustivas en diferentes dispositivos
 
----
-
-*Este proyecto fue desarrollado como parte de [Contexto del Proyecto - Curso, Materia, etc.]*
